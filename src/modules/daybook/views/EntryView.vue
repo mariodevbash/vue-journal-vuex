@@ -8,7 +8,9 @@
       </div>
 
       <div>
-        <button class="btn btn-danger mx-2">
+        <button class="btn btn-danger mx-2"
+          v-if="entry.id"
+          @click="onDeleteEntry">
           Borrar
           <i class="fa fa-trash-alt"></i>
         </button>
@@ -43,6 +45,7 @@
 import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import getDayMonthYear from "../helpers/getDayMonthYear";
+import Swal from 'sweetalert2'
 
 export default {
   props: {
@@ -75,7 +78,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions("journal", ["updateEntry","createEntry"]),
+    ...mapActions("journal", ["updateEntry","createEntry", "deleteEntry"]),
     loadEntry() {
       let entry
 
@@ -93,11 +96,26 @@ export default {
       this.entry = entry;
     },
     async saveEntry() {
+
+      new Swal({
+        title: 'Espere por favor',
+        allowOutsideClick: false
+      })
+      Swal.showLoading()
+
       if(this.entry.id){
-        this.updateEntry(this.entry)
+        await this.updateEntry(this.entry)
       }else{
-        this.createEntry(this.entry)
+        const id = await this.createEntry(this.entry)
+
+        this.$router.push({name: "entry", params: {id}})
       }
+
+      Swal.fire('Guardado', 'Entrada registrada exitosamente', 'success')
+    },
+    async onDeleteEntry(){
+      await this.deleteEntry(this.entry.id)
+      this.$router.push({name: "no-entry"})
     }
   },
   created() {
