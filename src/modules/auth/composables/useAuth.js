@@ -1,3 +1,4 @@
+import { computed } from "vue";
 import { useStore } from "vuex";
 
 const useAuth = () => {
@@ -13,9 +14,24 @@ const useAuth = () => {
     return resp;
   }
 
+  const checkAuthStatus = async() => {
+    const resp = await store.dispatch('auth/checkAuthentication')
+    return resp
+  }
+
+  const logout = () => {
+    store.commit('auth/logout')
+    store.commit('journal/clearEntries')
+  }
+
   return {
+    checkAuthStatus,
     createUser,
-    loginUser
+    loginUser,
+    logout,
+
+    authStatus: computed(() => store.getters['auth/currentState']),
+    username: computed(() => store.getters['auth/username']),
   };
 };
 
